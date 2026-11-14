@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>ThợViệt – Kết nối thợ xây dựng, chủ dự án và nhà phân phối vật liệu</title><meta name="description" content="ThợViệt kết nối thợ xây dựng với doanh nghiệp cần thuê thợ và nhà phân phối vật liệu. Tạo hồ sơ nghề nghiệp, tìm dự án, báo giá và trao đổi trực tiếp."><meta property="og:site_name" content="ThợViệt"><meta property="og:title" content="ThợViệt – Nền tảng kết nối ngành xây dựng"><meta property="og:description" content="Tìm thợ, đăng dự án, nhận báo giá và kết nối nhà phân phối vật liệu trên ThợViệt."><meta property="og:type" content="website"><link rel="stylesheet" href="style.css"><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon-192.png">
+<meta name="theme-color" content="#e8590c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="ThợViệt"></head><body>
+<header><div class="in nav" id="nav"></div></header><main class="in" id="app">
+<section aria-label="Giới thiệu ThợViệt" style="max-width:900px;margin:24px auto">
+  <h1>ThợViệt – Kết nối thợ xây dựng và doanh nghiệp</h1>
+  <p>ThợViệt là nền tảng kết nối thợ xây dựng, chủ dự án và nhà phân phối vật liệu tại Việt Nam. Người thợ có thể tạo hồ sơ nghề nghiệp, giới thiệu kỹ năng và công trình đã thực hiện; doanh nghiệp có thể đăng nhu cầu tuyển thợ, xem hồ sơ và trao đổi trực tiếp.</p>
+  <h2>Tìm việc và tuyển thợ minh bạch</h2>
+  <p>Thợ đăng ký tài khoản để tìm dự án phù hợp, gửi báo giá và trao đổi với chủ dự án. Doanh nghiệp đăng thông tin công việc, tiếp nhận đề nghị và xác nhận kết quả sau khi hoàn thành.</p>
+  <h2>Kết nối nhà phân phối vật liệu</h2>
+  <p>Cửa hàng và nhà phân phối có thể giới thiệu sản phẩm, khu vực phục vụ và thông tin liên hệ để tiếp cận các dự án xây dựng.</p>
+  <p><a href="#login">Đăng nhập hoặc tạo tài khoản ThợViệt</a></p>
+</section>
+</main>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="shared.js"></script>
+<script>
+let mode="login",role="tho";
+
+function vAuth(){$("#app").innerHTML=`<div class="au"><div style="text-align:center;font-size:28px;font-weight:800;color:var(--ac)">🔧 ThợViệt</div><p class="mu" style="text-align:center;margin-top:0">Kết nối thợ, doanh nghiệp xây dựng và nhà phân phối vật liệu</p><div class="card"><div class="tabs"><button id="t1" class="${mode==="login"?"on":""}">Đăng nhập</button><button id="t2" class="${mode==="reg"?"on":""}">Đăng ký</button></div><div class="f">${mode==="reg"?`<input id="nm" placeholder="Họ tên / Tên doanh nghiệp"><div class="roles"><div id="r1" class="on">🔧 Tôi là thợ<br><small class="mu">Tìm việc, nhận dự án</small></div><div id="r2">🏢 Tôi cần thuê thợ<br><small class="mu">Đăng dự án, chọn thợ</small></div><div id="r3">🏪 Nhà phân phối<br><small class="mu">Bán vật liệu xây dựng, mở gian hàng trên Chợ</small></div></div>`:""}<input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Mật khẩu (từ 6 ký tự)"><button class="btn" id="go">${mode==="reg"?"Tạo tài khoản":"Đăng nhập"}</button></div><div class="err" id="er"></div></div><p class="mu" style="text-align:center;font-size:13px">Dữ liệu được lưu an toàn trên máy chủ.</p></div>`;
+$("#t1").onclick=()=>{mode="login";vAuth()};$("#t2").onclick=()=>{mode="reg";vAuth()};role="tho";
+if(mode==="reg")[["r1","tho"],["r2","biz"],["r3","sup"]].forEach(([id,r])=>$("#"+id).onclick=()=>{role=r;["r1","r2","r3"].forEach(x=>$("#"+x).classList.toggle("on",x===id))});
+const go=async()=>{const em=$("#em").value.trim().toLowerCase(),pw=$("#pw").value,err=m=>$("#er").textContent=m,btn=$("#go");
+if(!em.includes("@")||pw.length<6)return err("Nhập email hợp lệ và mật khẩu từ 6 ký tự.");
+const nm=mode==="reg"?$("#nm").value.trim():"";if(mode==="reg"&&!nm)return err("Vui lòng nhập tên.");
+btn.disabled=true;err("Đang xử lý…");
+try{if(mode==="reg"){const d=await authSignUp(em,pw,nm,role);if(!d.session){btn.disabled=false;mode="login";vAuth();$("#er").style.color="var(--mu)";$("#er").textContent="Đã tạo tài khoản. Hãy mở email để xác nhận rồi đăng nhập.";return}}
+else await authSignIn(em,pw);
+await boot();if(S&&DEST[S.role])location.href=DEST[S.role];else{btn.disabled=false;err("Không đọc được hồ sơ tài khoản. Hãy thử lại.")}}
+catch(e){btn.disabled=false;err(viErr(e))}};
+$("#go").onclick=go;$("#pw").onkeydown=e=>{if(e.key==="Enter")go()}}
+
+
+$("#nav").innerHTML='<span class="logo">🔧 ThợViệt</span>';boot().then(ok=>{if(!ok)return;if(S&&DEST[S.role])location.replace(DEST[S.role]);else vAuth()});
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>

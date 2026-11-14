@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>ThợViệt – Nhà phân phối vật liệu</title><link rel="stylesheet" href="style.css"><link rel="manifest" href="/manifest.webmanifest"><link rel="icon" href="/icon-192.png">
+<meta name="theme-color" content="#e8590c"></head><body>
+<header><div class="in nav" id="nav"></div></header><main class="in" id="app"></main>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="shared.js"></script>
+<script>
+let edit=false;
+function vShop(){const me=myShop();if(!me||edit)return vForm(me);
+$("#app").innerHTML=`<h1 style="max-width:680px;margin:8px auto">Gian hàng của tôi</h1><div style="max-width:680px;margin:0 auto"><div class="card" style="margin-bottom:12px">🛒 Gian hàng của bạn đang hiện ở mục <b>Chợ</b> của các chủ dự án. Khi có khách hỏi hàng, tin nhắn sẽ hiện ở nút <b>💬 Tin nhắn</b> góc màn hình. Hãy trả lời sớm để không mất khách. Bạn cũng có thể vào mục <b>Tìm việc</b> để xem các dự án đang triển khai (kể cả ở tỉnh khác) và chủ động nhắn chủ dự án.</div>${shopCard(me,{act:'<div style="margin-top:12px"><button class="btn g" id="ed">Sửa gian hàng</button></div>'})}</div>`;
+$("#ed").onclick=()=>{edit=true;vShop()}}
+function vForm(me){const m=me||{name:S.name,cat:SHOPCATS[0],city:"",addr:"",phone:"",skills:[],bio:"",photo:""};let photo=m.photo||"",ph=shopPhotos(m).slice(0,6);
+const logo=()=>photo?`<img src="${esc(photo)}" alt="">`:ini(m.name);
+const phDraw=()=>{$("#spv").innerHTML=ph.map((s,i)=>`<div class="ph"><img src="${esc(s)}" alt=""><button class="btn g" style="position:absolute;top:4px;right:4px;min-height:0;padding:2px 8px" onclick="shDel(${i})">✕</button></div>`).join("")};
+window.shDel=i=>{ph.splice(i,1);phDraw()};
+$("#app").innerHTML=`<h1>${me?"Sửa gian hàng":"Mở gian hàng của bạn"}</h1><div class="cv"><div class="cvh"><label class="avu" title="Đổi logo / ảnh đại diện"><span id="pvw" style="display:contents">${logo()}</span><input type="file" accept="image/*" id="lg" hidden></label><div style="flex:1;display:grid;gap:8px"><div style="font-size:13px">Logo hoặc ảnh đại diện cửa hàng</div><input id="a1" placeholder="Tên doanh nghiệp / cửa hàng" value="${esc(m.name)}"><select id="a2">${shopCatOpts()}</select></div></div>
+<div class="cvb"><div class="cvs"><h3>Thông tin liên hệ</h3><div class="gr">${fh("Tỉnh/thành phố",cityInp("a3",m.city))}${fh("Số điện thoại",`<input id="tel" type="tel" value="${esc(m.phone||"")}">`)}${fld("Địa chỉ cụ thể (số nhà, đường, phường/xã…)",`<input id="a4" value="${esc(m.addr||"")}" style="grid-column:1/-1">`)}</div></div>
+<div class="cvs"><h3>Sản phẩm chính</h3>${fld("Các mặt hàng bạn bán, cách nhau dấu phẩy",`<input id="a5" placeholder="VD: Thép Hòa Phát, Xi măng Hà Tiên, Gạch ốp lát" value="${esc((m.skills||[]).join(", "))}">`)}</div>
+<div class="cvs"><h3>Giới thiệu gian hàng</h3><textarea id="a6" style="min-height:100px" placeholder="Giới thiệu ngắn: loại hàng, bán theo tấn hay theo lô, chính sách giao hàng, thời gian làm việc…">${esc(m.bio||"")}</textarea></div>
+<div class="cvs"><h3>Hình ảnh gian hàng / sản phẩm</h3><input type="file" id="sp" accept="image/*" multiple><div class="mu" style="font-size:13px;margin-top:4px">Tối đa 6 ảnh.</div><div class="gal" id="spv" style="margin-top:8px"></div></div>
+<div class="sv"><button class="btn" id="sb">${me?"Lưu thông tin":"Mở gian hàng"}</button>${me?'<button class="btn g" id="cc">Huỷ</button>':""}<span class="err" id="er"></span></div></div></div>`;
+$("#a2").value=m.cat;phDraw();
+$("#lg").onchange=e=>rd(e.target.files[0],d=>shrinkMax(d,480,s=>{photo=s;$("#pvw").innerHTML=logo()}));
+$("#sp").onchange=e=>{const fs=[...e.target.files].slice(0,Math.max(0,6-ph.length));if(e.target.files.length>fs.length)alert("Tối đa 6 ảnh.");fs.forEach(f=>rd(f,d=>shrinkMax(d,1280,s=>{if(ph.length<6){ph.push(s);phDraw()}})));e.target.value=""};
+const cc=$("#cc");if(cc)cc.onclick=()=>{edit=false;vShop()};
+$("#sb").onclick=()=>{const v=i=>$("#"+i).value.trim(),err=t=>{$("#er").textContent=t};
+const name=v("a1"),city=normCity(v("a3")),addr=v("a4"),phone=v("tel");
+if(!name)return err("Vui lòng nhập tên doanh nghiệp.");
+if(!cityOk(city))return err("Hãy chọn tỉnh/thành phố trong danh sách gợi ý.");
+if(!addr)return err("Vui lòng nhập địa chỉ cụ thể.");
+if(phone.replace(/\D/g,"").length<8)return err("Vui lòng nhập số điện thoại hợp lệ.");
+const o={id:me?me.id:nid(),email:S.email,name,cat:v("a2"),city,addr,rate:"",negot:false,exp:0,bio:v("a6"),skills:v("a5").split(",").map(s=>s.trim()).filter(Boolean).slice(0,30),gender:"",byear:"",photo,albums:[{id:1,title:"Hình ảnh gian hàng",photos:ph.map(src=>({src}))}],gallery:[],work:[],edu:[],cert:[],award:[],pub:true,phone,cmail:"",ref:[],busy:false,active:[],reviews:me?me.reviews:[],kind:"shop"};
+if(me)Object.assign(me,o);else DB.workers.push(o);save();edit=false;vShop();scrollTo(0,0)}}
+/* ---------- TÌM VIỆC: xem dự án đang triển khai để chào vật liệu ---------- */
+let sq="",sp="";
+const sNear=j=>{const m=myShop();return !!m&&!!m.city&&normCity(j.city)===normCity(m.city)};
+const sFlt=()=>DB.jobs.filter(j=>(!sp||normCity(j.city)===sp)&&(!sq||kwMatch([j.title,j.cat,jAddr(j),j.desc||"",j.byName||""].join(" "),sq))).sort((a,b)=>sNear(b)-sNear(a)||b.id-a.id);
+const sCard=j=>{const img=j.byLogo||(j.photos||[])[0];
+return`<div class="jc"><div class="jh"><div class="jl"${img?` style="background-image:url('${esc(img)}')"`:""}>${img?"":ini(j.byName||j.title)}</div><div class="jm"><div class="jt">${esc(j.title)}</div><div class="jo">${esc(j.byName)}</div></div></div>${sNear(j)?'<div><span class="tag" style="color:#2a9d4a;border-color:#2a9d4a">📍 Cùng tỉnh với gian hàng của bạn</span></div>':""}<div class="jk"><div><b>Địa chỉ:</b> ${esc(jAddr(j))}</div><div><b>Đang cần:</b> ${ICON[j.cat]} ${esc(j.cat)}${j.days?" · ⏱ "+esc(j.days):""}</div></div><div class="jb"><button class="btn" onclick="sView(${j.id})">Xem tin</button><button class="btn g" onclick="sChat(${j.id})">💬 Nhắn chủ dự án</button></div></div>`};
+const sList=()=>sFlt().map(sCard).join("")||'<p class="mu">Chưa có dự án nào phù hợp. Hãy thử đổi tỉnh/thành hoặc từ khoá.</p>';
+function vViec(){$("#app").innerHTML=`<h1>Dự án đang triển khai</h1><div class="mu">Xem các dự án (kể cả ở tỉnh khác) để chào vật liệu cho chủ dự án. Bấm Nhắn chủ dự án để giới thiệu gian hàng và báo giá.</div><div class="flt"><input id="q" class="q" type="search" placeholder="Tìm dự án, khu vực, chủ dự án…" value="${esc(sq)}"><div class="cb" id="cb-p"></div></div><div class="grid" id="lst">${sList()}</div>`;
+comboInit("cb-p",PROV.map(p=>p[0]),sp,"Tất cả tỉnh/thành",v=>{sp=v;vViec()},provAlias);
+$("#q").oninput=e=>{sq=e.target.value;$("#lst").innerHTML=sList()}}
+function sChat(id){mclose();if(!myShop()){alert("Hãy mở gian hàng trước để chủ dự án biết bạn bán gì.");location.hash="gianhang";return}chatOwner(id)}
+function sView(id){const j=DB.jobs.find(x=>x.id===id);if(!j)return;const img=j.byLogo||(j.photos||[])[0];mclose();const d=document.createElement("div");d.className="am jv";d.id="mdl";d.onclick=e=>{if(e.target===d)mclose()};
+const row=(ic,l,v)=>`<div class="jr"><span class="ji">${ic}</span><div><b>${l}:</b> ${v}</div></div>`;
+d.innerHTML=`<div class="amp jd"><div class="jdh"><b>Chi tiết dự án</b><span class="x2" onclick="mclose()">✕</span></div><div class="jdb"><div class="jh" style="margin-top:4px"><div class="jl big"${img?` style="background-image:url('${esc(img)}')"`:""}>${img?"":ini(j.byName||j.title)}</div><div class="jm"><div class="jt" style="font-size:18px;-webkit-line-clamp:3">${esc(j.title)}</div><div class="jo">${esc(j.byName)}</div></div></div><div style="margin-top:10px">${row("📍","Địa điểm",esc(jAddr(j))+(j.addr?` <a href="${esc(mapUrl(j))}" target="_blank" rel="noopener">(Xem bản đồ)</a>`:""))}${row(ICON[j.cat]||"🛠","Đang cần",esc(j.cat))}${j.days?row("⏱","Số công dự kiến",esc(j.days)):""}${row("🏢","Chủ dự án",esc(j.byName||"—"))}</div>${j.desc?`<h4 class="jsec">MÔ TẢ CÔNG VIỆC</h4><div class="pre">${esc(j.desc)}</div>`:""}${(j.photos||[]).length?`<h4 class="jsec">ẢNH DỰ ÁN</h4>${jobPh(j)}`:""}</div><div class="jdf"><button class="btn" style="flex:1" onclick="sChat(${j.id})">💬 Nhắn chủ dự án</button></div></div>`;document.body.appendChild(d)}
+function route(){if(!guard("sup"))return;const h=location.hash.slice(1)||(myShop()?"viec":"gianhang");
+if(!["viec","gianhang","taikhoan"].includes(h)){location.hash=myShop()?"viec":"gianhang";return}
+if(h!=="gianhang"&&myShop())edit=false;
+$("#nav").innerHTML=navHtml("sup",h);if(h==="taikhoan")vAccount();else if(h==="viec")vViec();else{if(!myShop())edit=true;vShop()}scrollTo(0,0)}
+startPage();
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>

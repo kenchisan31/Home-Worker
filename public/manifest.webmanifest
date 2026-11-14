@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "ThợViệt – Kết nối ngành xây dựng",
+  "short_name": "ThợViệt",
+  "description": "Kết nối thợ xây dựng, chủ dự án và nhà phân phối vật liệu.",
+  "lang": "vi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f7f7",
+  "theme_color": "#e8590c",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

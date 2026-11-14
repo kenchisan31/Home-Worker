@@ -1,0 +1,16 @@
+{
+  "name": "thovet",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "db:setup": "node scripts/db.mjs db/schema.sql",
+    "db:seed": "node scripts/db.mjs db/seed.sql"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}

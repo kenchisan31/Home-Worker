@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>ThợViệt – Thống kê</title><link rel="stylesheet" href="style.css"><link rel="manifest" href="/manifest.webmanifest">
+<style>
+.kp{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kp .card{padding:12px}.kp b{display:block;font-size:26px;line-height:1.2}
+table.ft{width:100%;border-collapse:collapse;margin-top:8px}.ft td{padding:8px 6px;border-bottom:1px solid var(--bd)}.ft td:last-child{text-align:right;white-space:nowrap}
+.bar{height:8px;border-radius:4px;background:var(--ac);min-width:2px}
+.sg{display:flex;align-items:flex-end;gap:2px;height:90px;margin-top:8px}.sg i{flex:1;background:var(--ac);border-radius:2px 2px 0 0;min-height:2px;opacity:.85}
+</style></head><body>
+<header><div class="in nav"><span class="logo">📊 ThợViệt – Thống kê</span><a class="t" href="index.html">Về trang chính</a></div></header>
+<main class="in" id="app"><p class="mu">Đang tải…</p></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct=(a,b)=>b?Math.round(a*100/b)+"%":"–";
+const kp=(n,t)=>`<div class="card"><b>${n}</b><span class="mu">${t}</span></div>`;
+async function main(){
+  let r,d={};
+  try{r=await fetch("/api/rpc",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({op:"admin_stats",args:{}})});d=await r.json()}catch(e){$("#app").innerHTML='<p>Không kết nối được máy chủ.</p>';return}
+  if(r.status===401){$("#app").innerHTML='<p>Bạn cần <a href="index.html">đăng nhập</a> bằng tài khoản quản trị.</p>';return}
+  if(!r.ok){$("#app").innerHTML=`<p>${esc(d.error||"Lỗi")}</p><p class="mu">Tài khoản quản trị là email nằm trong biến môi trường <code>ADMIN_EMAILS</code> trên Vercel (cần Redeploy sau khi thêm).</p>`;return}
+  const u=d.users,w=d.workers,j=d.jobs,c=d.convs,m=d.messages,o=d.offers,v=d.reviews;
+  const fun=[["Dự án đã đăng",j.total],["…có ít nhất 1 báo giá",j.with_bid],["…đã chọn thợ",j.chosen],["…thợ báo đã xong",j.done_req],["…chủ xác nhận hoàn thành",j.done]];
+  const mx=Math.max(1,...d.signups.map(x=>x.n)),pmx=Math.max(1,...d.provinces.map(x=>x.n));
+  $("#app").innerHTML=`<h1>Số liệu thật của nền tảng</h1><div class="mu">Cập nhật ${new Date(d.at).toLocaleString("vi-VN")} · không tính dữ liệu mẫu.</div>
+  <h3>Người dùng</h3><div class="kp">${kp(u.total,"tổng tài khoản")}${kp(u.tho,"thợ")}${kp(u.biz,"chủ dự án")}${kp(u.sup,"nhà phân phối")}${kp(u.d7,"đăng ký 7 ngày qua")}${kp(u.d30,"đăng ký 30 ngày qua")}</div>
+  <div class="card"><b>Đăng ký mới theo ngày (30 ngày)</b><div class="sg">${d.signups.map(x=>`<i style="height:${Math.round(x.n*100/mx)}%" title="${x.d}: ${x.n}"></i>`).join("")||'<span class="mu">Chưa có.</span>'}</div></div>
+  <h3>Hồ sơ</h3><div class="kp">${kp(w.tho,"hồ sơ thợ")}${kp(w.tho_pub,"thợ công khai hồ sơ")}${kp(w.shop,"gian hàng vật liệu")}</div>
+  <h3>Hoạt động</h3><div class="kp">${kp(d.bids.total,"báo giá")}${kp(c.total,"cuộc trò chuyện")}${kp(c.replied,"có cả hai bên nhắn")}${kp(m.total,"tin nhắn")}${kp(m.d7,"tin nhắn 7 ngày qua")}${kp(o.total,"đề nghị giao việc")}${kp(o.accepted,"đề nghị được nhận")}${kp(v.total,"đánh giá")}${kp(v.verified,"đánh giá đã xác thực")}</div>
+  <h3>Phễu giao dịch</h3><div class="card"><table class="ft">${fun.map(([t,n],i)=>`<tr><td>${t}<div class="bar" style="width:${Math.round(n*100/Math.max(1,fun[0][1]))}%"></div></td><td><b>${n}</b> <span class="mu">${i?pct(n,fun[i-1][1])+" so với bước trước":""}</span></td></tr>`).join("")}</table></div>
+  <h3>Dự án theo tỉnh/thành</h3><div class="card"><table class="ft">${d.provinces.map(x=>`<tr><td>${esc(x.city)}<div class="bar" style="width:${Math.round(x.n*100/pmx)}%"></div></td><td><b>${x.n}</b></td></tr>`).join("")||'<tr><td class="mu">Chưa có dự án.</td></tr>'}</table></div>`;
+}
+main();
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>
