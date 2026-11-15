@@ -51,4 +51,4 @@ if(!["viec","gianhang","taikhoan"].includes(h)){location.hash=myShop()?"viec":"g
 if(h!=="gianhang"&&myShop())edit=false;
 $("#nav").innerHTML=navHtml("sup",h);if(h==="taikhoan")vAccount();else if(h==="viec")vViec();else{if(!myShop())edit=true;vShop()}scrollTo(0,0)}
 startPage();
-</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script><script src="/notifications.js" defer></script></body></html>

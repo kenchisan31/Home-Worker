@@ -76,3 +76,36 @@ Bản 1.1 ưu tiên phần SEO kỹ thuật, PWA và hardening API mà không vi
 - Chưa tích hợp MoMo/VNPay/VietQR, ký quỹ hoặc đối soát.
 - Chưa triển khai KYC/CCCD; không nên thu thập CCCD trước khi có chính sách lưu trữ, phân quyền, mã hóa, thời hạn xóa và quy trình tuân thủ phù hợp.
 - Chưa chuyển toàn bộ SPA sang Next.js/SSR. Các trang hồ sơ/dự án công khai đã có HTML server-render riêng để xử lý nhu cầu SEO trước, còn các màn hình sau đăng nhập tiếp tục dùng SPA.
+
+
+## ThợViệt v1.2 – Quản trị, Web Push và giao dịch
+
+### Cài đặt / nâng cấp
+
+1. Cập nhật mã nguồn lên Vercel và chạy `npm install` để cài thêm `web-push`.
+2. Chạy migration một lần trên database hiện tại: `npm run db:migrate:platform` (cần `DATABASE_URL` trong `.env.local`) hoặc dán `db/migrate_platform.sql` vào Neon SQL Editor.
+3. Với database hoàn toàn mới, `db/schema.sql` đã bao gồm các bảng và cột mới; chạy `npm run db:setup`.
+4. Trên máy local, chạy `npm run push:keys` để tạo cặp VAPID. Đưa `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` vào Vercel Environment Variables. **Không đưa private key vào frontend hoặc Git.**
+5. Redeploy Vercel. Website phải chạy bằng HTTPS.
+6. Người dùng đăng nhập, bấm nút 🔔 Thông báo → “Bật thông báo trên điện thoại” và cho phép thông báo trên trình duyệt.
+
+### Thông báo trên điện thoại
+
+- Android: Chrome/Edge hỗ trợ Web Push trên website HTTPS.
+- iPhone/iPad: cần iOS/iPadOS 16.4 trở lên, thêm ThợViệt vào Màn hình chính (Add to Home Screen), mở ứng dụng từ biểu tượng vừa thêm, rồi cấp quyền thông báo.
+- Mỗi thiết bị cần đăng ký quyền riêng. Người dùng có thể bật trên nhiều thiết bị; giới hạn 12 thiết bị/tài khoản.
+- Nếu chưa cấu hình VAPID trên Vercel, thông báo trong hộp chuông vẫn được lưu trong Neon nhưng push ra màn hình khóa sẽ chưa gửi được.
+
+### Quản trị và giao dịch
+
+- `/admin.html`: khóa/mở khóa tài khoản, duyệt/từ chối hồ sơ thợ và dự án, xử lý báo cáo, xem hợp đồng và đối soát thủ công các giao dịch.
+- `/trade.html`: tạo hợp đồng với thợ đã được chọn, theo dõi trạng thái hợp đồng, tạo khoản cần thanh toán và xem sổ giao dịch.
+- `/report.html`: người dùng gửi báo cáo vi phạm.
+- Các hồ sơ thợ mới cần được duyệt trước khi hiển thị công khai; dự án mới ở trạng thái chờ duyệt. Dữ liệu công khai và sitemap chỉ lấy hồ sơ/dự án đã được duyệt.
+
+**Giới hạn quan trọng:** module giao dịch hiện quản lý hợp đồng, phí nền tảng dự kiến và sổ khoản phải thu/chi. Nút “đã thu/đã hoàn” trong Admin là đối soát thủ công, không chứng minh tiền đã chuyển. Chưa kết nối MoMo/VNPay, chưa có webhook chữ ký, và chưa giữ tiền ký quỹ thực tế. Không quảng bá tính năng này là escrow cho tới khi tích hợp cổng thanh toán, cơ chế hoàn/giải ngân và quy trình pháp lý phù hợp.
+
+
+### v1.2.1 – sửa kiểm tra mã thợ trong hợp đồng
+
+Chuẩn hóa giá trị `BIGINT` từ PostgreSQL trước khi so sánh mã thợ đã được chọn, tránh lỗi kiểu dữ liệu khi tạo hợp đồng.

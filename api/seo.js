@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   try {
     if (type === "worker") {
       const rows = await db.query(
-        "select id,name,cat,city,rate,negot,exp,bio,skills,photo,albums,created_at from workers where id=$1 and kind='tho' and pub=true",
+        "select id,name,cat,city,rate,negot,exp,bio,skills,photo,albums,created_at from workers where id=$1 and kind='tho' and pub=true and moderation_status='approved'",
         [id]
       );
       const w = rows[0];
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
     }
 
     const rows = await db.query(
-      "select j.id,j.title,j.cat,j.city,j.budget,j.days,j.descr,j.addr,j.created_at,u.name as owner_name from jobs j left join users u on u.id=j.owner_id where j.id=$1 and j.owner_id is not null and j.done_at=0",
+      "select j.id,j.title,j.cat,j.city,j.budget,j.days,j.descr,j.addr,j.created_at,u.name as owner_name from jobs j left join users u on u.id=j.owner_id where j.id=$1 and j.owner_id is not null and j.done_at=0 and j.moderation_status='approved'",
       [id]
     );
     const j = rows[0];

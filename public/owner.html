@@ -53,4 +53,4 @@ if(!["tho","cho","duan","dangduan","taikhoan"].includes(h)&&!isW){location.hash=
 $("#nav").innerHTML=navHtml("biz",h,isW);
 if(isW)vProfile(+h.slice(2));else({tho:vTho,cho:vCho,duan:vMyJobs,dangduan:vPost,taikhoan:vAccount})[h]();scrollTo(0,0)}
 startPage();
-</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script><script src="/notifications.js" defer></script></body></html>

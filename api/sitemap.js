@@ -11,8 +11,8 @@ export default async function handler(req, res) {
   try {
     const db = getDb(), base = baseUrl(req);
     const [workers, jobs] = await Promise.all([
-      db.query("select id,created_at from workers where kind='tho' and pub=true order by created_at desc limit 20000"),
-      db.query("select id,created_at from jobs where owner_id is not null and done_at=0 order by created_at desc limit 20000")
+      db.query("select id,created_at from workers where kind='tho' and pub=true and moderation_status='approved' order by created_at desc limit 20000"),
+      db.query("select id,created_at from jobs where owner_id is not null and done_at=0 and moderation_status='approved' order by created_at desc limit 20000")
     ]);
     const urls = [
       { loc:`${base}/`, priority:"1.0", change:"weekly" },

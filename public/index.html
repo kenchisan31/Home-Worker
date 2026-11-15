@@ -33,4 +33,4 @@ $("#go").onclick=go;$("#pw").onkeydown=e=>{if(e.key==="Enter")go()}}
 
 
 $("#nav").innerHTML='<span class="logo">🔧 ThợViệt</span>';boot().then(ok=>{if(!ok)return;if(S&&DEST[S.role])location.replace(DEST[S.role]);else vAuth()});
-</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script><script src="/notifications.js" defer></script></body></html>

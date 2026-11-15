@@ -88,4 +88,4 @@ if(!["viec","bao","gianhang","taikhoan"].includes(h)){location.hash="viec";retur
 $("#nav").innerHTML=navHtml("tho",h);if(h!=="gianhang")edit=false;
 ({viec:vViec,bao:vBids,gianhang:vShop,taikhoan:vAccount})[h]();scrollTo(0,0)}
 startPage();
-</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script><script src="/notifications.js" defer></script></body></html>

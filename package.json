@@ -1,6 +1,6 @@
 {
   "name": "thovet",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,9 +8,12 @@
   },
   "scripts": {
     "db:setup": "node scripts/db.mjs db/schema.sql",
-    "db:seed": "node scripts/db.mjs db/seed.sql"
+    "db:seed": "node scripts/db.mjs db/seed.sql",
+    "push:keys": "node scripts/generate-vapid.mjs",
+    "db:migrate:platform": "node scripts/db.mjs db/migrate_platform.sql"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.0"
+    "@neondatabase/serverless": "^1.0.0",
+    "web-push": "^3.6.7"
   }
 }

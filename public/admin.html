@@ -9,6 +9,34 @@ table.ft{width:100%;border-collapse:collapse;margin-top:8px}.ft td{padding:8px 6
 </style></head><body>
 <header><div class="in nav"><span class="logo">📊 ThợViệt – Thống kê</span><a class="t" href="index.html">Về trang chính</a></div></header>
 <main class="in" id="app"><p class="mu">Đang tải…</p></main>
+
+<style>
+.adm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:12px 0 24px}.adm-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;min-width:0}.adm-card h3{margin:0 0 8px}.adm-row{border-top:1px solid var(--bd);padding:9px 0;overflow-wrap:anywhere}.adm-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.adm-actions button{border:1px solid var(--bd);border-radius:7px;padding:6px 9px;background:var(--bg);color:inherit;cursor:pointer}.adm-actions button.primary{background:var(--ac);color:white;border-color:var(--ac)}.adm-note{width:100%;margin-top:6px;padding:7px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);color:inherit}
+</style>
+<section class="in" id="adminTools"><h2>Quản trị & kiểm duyệt</h2><p class="mu">Đang tải dữ liệu quản trị…</p></section>
+<script>
+async function adminRpc(op,args={}){const r=await fetch('/api/rpc',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({op,args})});const d=await r.json();if(!r.ok)throw new Error(d.error||'Lỗi');return d}
+const aesc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function loadAdminTools(){const root=document.querySelector('#adminTools');if(!root)return;try{const d=await adminRpc('admin_data');
+ const card=(title,items,render)=>`<div class="adm-card"><h3>${title} (${items.length})</h3>${items.map(render).join('')||'<p class="mu">Không có dữ liệu.</p>'}</div>`;
+ root.innerHTML=`<div class="adm-grid">
+ ${card('Tài khoản',d.users,x=>`<div class="adm-row"><b>${aesc(x.name)}</b><div class="mu">${aesc(x.email)} · ${aesc(x.role)} · ${aesc(x.account_status)}</div><div class="adm-actions"><button data-kind="user" data-id="${aesc(x.id)}" data-status="${x.account_status==='locked'?'active':'locked'}">${x.account_status==='locked'?'Mở khóa':'Khóa tài khoản'}</button></div></div>`)}
+ ${card('Hồ sơ thợ chờ duyệt / đã duyệt',d.workers,x=>`<div class="adm-row"><b>${aesc(x.name)}</b><div class="mu">#${x.id} · ${aesc(x.cat)} · ${aesc(x.city)} · ${aesc(x.email)} · ${aesc(x.moderation_status)}</div><div class="adm-actions"><button class="primary" data-kind="worker" data-id="${x.id}" data-status="approved">Duyệt</button><button data-kind="worker" data-id="${x.id}" data-status="rejected">Từ chối</button><button data-kind="worker" data-id="${x.id}" data-status="pending">Đưa về chờ</button></div></div>`)}
+ ${card('Dự án',d.jobs,x=>`<div class="adm-row"><b>${aesc(x.title)}</b><div class="mu">#${x.id} · ${aesc(x.city)} · ${aesc(x.owner_email)} · ${aesc(x.moderation_status)}</div><div class="adm-actions"><button class="primary" data-kind="job" data-id="${x.id}" data-status="approved">Duyệt</button><button data-kind="job" data-id="${x.id}" data-status="rejected">Từ chối</button><button data-kind="job" data-id="${x.id}" data-status="pending">Chờ duyệt</button></div></div>`)}
+ ${card('Báo cáo',d.reports,x=>`<div class="adm-row"><b>#${x.id} · ${aesc(x.reason)}</b><div class="mu">${aesc(x.target_type)} #${aesc(x.target_id)} · ${aesc(x.reporter_email)} · ${aesc(x.status)}</div><div>${aesc(x.details)}</div><input class="adm-note" id="report-note-${x.id}" placeholder="Ghi chú xử lý"><div class="adm-actions"><button data-kind="report" data-id="${x.id}" data-status="reviewing">Đang xử lý</button><button class="primary" data-kind="report" data-id="${x.id}" data-status="resolved">Đã giải quyết</button><button data-kind="report" data-id="${x.id}" data-status="rejected">Bác bỏ</button></div></div>`)}
+ ${card('Hợp đồng',d.contracts,x=>`<div class="adm-row"><b>${aesc(x.title)}</b><div class="mu">${aesc(x.id)} · ${aesc(x.worker_name)} · ${Number(x.amount).toLocaleString('vi-VN')}đ · ${aesc(x.status)}</div><div class="mu">Phí nền tảng dự kiến: ${Number(x.platform_fee).toLocaleString('vi-VN')}đ</div></div>`)}
+ ${card('Sổ giao dịch',d.transactions,x=>`<div class="adm-row"><b>${aesc(x.kind)} · ${Number(x.amount).toLocaleString('vi-VN')}đ</b><div class="mu">${aesc(x.id)} · ${aesc(x.provider)} · ${aesc(x.status)}</div><div class="adm-actions"><button class="primary" data-kind="transaction" data-id="${aesc(x.id)}" data-status="paid">Đối soát: đã thu</button><button data-kind="transaction" data-id="${aesc(x.id)}" data-status="failed">Thất bại</button><button data-kind="transaction" data-id="${aesc(x.id)}" data-status="refunded">Đã hoàn</button></div><div class="mu">Chức năng đối soát thủ công, chưa phải webhook thanh toán.</div></div>`)}
+ </div>`;
+ root.onclick=async e=>{const b=e.target.closest('button[data-kind]');if(!b)return;try{const kind=b.dataset.kind,id=b.dataset.id,status=b.dataset.status;let op,args;
+ if(kind==='user'){op='admin_user_set';args={id,status,note:status==='locked'?'Tạm khóa bởi quản trị viên':''}}
+ else if(kind==='worker'||kind==='job'){op='admin_moderate';args={type:kind,id:Number(id),status,note:''}}
+ else if(kind==='report'){op='admin_report_set';args={id:Number(id),status,note:document.querySelector('#report-note-'+id)?.value||''}}
+ else {op='admin_transaction_set';args={id,status,providerRef:'manual-admin',note:'Đối soát thủ công bởi quản trị viên'}}
+ await adminRpc(op,args);await loadAdminTools();
+ }catch(err){alert(err.message)}};
+ }catch(e){root.innerHTML='<p>'+aesc(e.message)+'</p>'}}
+</script>
+
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pct=(a,b)=>b?Math.round(a*100/b)+"%":"–";
@@ -29,5 +57,5 @@ async function main(){
   <h3>Phễu giao dịch</h3><div class="card"><table class="ft">${fun.map(([t,n],i)=>`<tr><td>${t}<div class="bar" style="width:${Math.round(n*100/Math.max(1,fun[0][1]))}%"></div></td><td><b>${n}</b> <span class="mu">${i?pct(n,fun[i-1][1])+" so với bước trước":""}</span></td></tr>`).join("")}</table></div>
   <h3>Dự án theo tỉnh/thành</h3><div class="card"><table class="ft">${d.provinces.map(x=>`<tr><td>${esc(x.city)}<div class="bar" style="width:${Math.round(x.n*100/pmx)}%"></div></td><td><b>${x.n}</b></td></tr>`).join("")||'<tr><td class="mu">Chưa có dự án.</td></tr>'}</table></div>`;
 }
-main();
-</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script></body></html>
+main().then(loadAdminTools);
+</script><script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script><script src="/notifications.js" defer></script></body></html>
